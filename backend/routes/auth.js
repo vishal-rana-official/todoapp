@@ -20,7 +20,7 @@ router.post('/createuser', async (req, res) => {
             password: req.body.password
         })
     }
-    // Making a jsonweb token upon successful signup 
+    // Making a jsonweb token upon successful signup and return it
     const data=user.id;
 
     const authtoken= jwt.sign(data,JWT_secret);
