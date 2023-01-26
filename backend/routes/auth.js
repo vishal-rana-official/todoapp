@@ -9,6 +9,7 @@ const JWT_secret = "123456789";
 //  Route 1:                             create a user using the POST '/api/auth/createuser' no login required
 
 router.post('/createuser', async (req, res) => {
+    let success = true;
     // check whether the user with a email already exists in our database
     let user = await User.findOne({ email: req.body.email })
     if (user) {
@@ -25,14 +26,14 @@ router.post('/createuser', async (req, res) => {
     const data = user.id;
 
     const authtoken = jwt.sign(data, JWT_secret);
-    res.status(200).json({ authtoken });
+    res.status(200).json({ success, authtoken });
 
 })
 
 //  Route 2:                            authenticate a user using the POST '/api/auth/login' no login required
 
 router.post('/login', async (req, res) => {
-
+    let success = true
     const { email, password } = req.body;
     let user = await User.findOne({ email })
     console.log(user)
@@ -48,7 +49,7 @@ router.post('/login', async (req, res) => {
     const data = user.id;
 
     const authtoken = jwt.sign(data, JWT_secret);
-    res.status(200).json({ authtoken });
+    res.status(200).json({ success,authtoken });
 })
 
 //  Route 3:                          getting details of logged in  user using the POST '/api/auth/getuser' login required
