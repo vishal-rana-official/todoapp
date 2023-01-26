@@ -1,15 +1,16 @@
-const express = require('express')
+const express = require('express');
 const router = express.Router();
-const User = require('../models/Users')
+const User = require('../models/Users');
 var jwt = require('jsonwebtoken');
+var fetchuser = require('../middleware/fetchuser');
 
 const JWT_secret = "123456789";
 
-//                              create a user using the POST '/api/auth/createuser' no login required
+//  Route 1:                             create a user using the POST '/api/auth/createuser' no login required
 
 router.post('/createuser', async (req, res) => {
     // check whether the user with a email already exists in our database
-    let user =await User.findOne({ email: req.body.email })
+    let user = await User.findOne({ email: req.body.email })
     if (user) {
         return res.status(400).json({ error: "sorry a user with this email already exists" })
     }
@@ -21,13 +22,43 @@ router.post('/createuser', async (req, res) => {
         })
     }
     // Making a jsonweb token upon successful signup and return it
-    const data=user.id;
+    const data = user.id;
 
-    const authtoken= jwt.sign(data,JWT_secret);
-    console.log(data)
-    res.status(200).json({authtoken});
+    const authtoken = jwt.sign(data, JWT_secret);
+    res.status(200).json({ authtoken });
 
 })
+
+//  Route 2:                            authenticate a user using the POST '/api/auth/login' no login required
+
+router.post('/login', async (req, res) => {
+
+    const { email, password } = req.body;
+    let user = await User.findOne({ email })
+    console.log(user)
+    if (!user) {
+        return res.status(400).json({ error: "try to enter a email used for during the signup" })
+    }
+    else {
+        let comparepassword = user.password.localeCompare(password);
+        if (comparepassword != 0) {
+            return res.status(400).json({ error: "try to enter a correct password" })
+        }
+    }
+    const data = user.id;
+
+    const authtoken = jwt.sign(data, JWT_secret);
+    res.status(200).json({ authtoken });
+})
+
+//  Route 3:                          getting details of logged in  user using the POST '/api/auth/getuser' login required
+
+router.post('/getuser',fetchuser, async(req,res)=>{
+    const userid=req.id;
+    const user = await User.findById(userid);
+    res.send(user);
+})
+
 
 
 module.exports = router;
